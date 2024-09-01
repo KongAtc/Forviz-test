@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="styles.css" rel="stylesheet" />
+    <title>01 - CSS Test</title>
+  </head>
+  <body>
+    <div class="container">
+      <p>Everyone's photos</p>
+      <div class="wrapper"></div>
+    </div>
+    <script>
+      getListImage();
+      async function getListImage() {
+        const url = "https://picsum.photos/v2/list";
+
+        const response = await fetch(url);
+        const listImage = await response.json();
+        const wrapper = document.querySelector(".wrapper");
+
+        listImage.forEach((image) => {
+          const img = document.createElement("img");
+          img.src = image.download_url;
+          img.alt = image.author;
+          wrapper.appendChild(img);
+        });
+      }
+    </script>
+  </body>
+</html>

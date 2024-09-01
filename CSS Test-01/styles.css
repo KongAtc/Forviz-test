@@ -1,0 +1,23 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 0 4%;
+  max-width: 100%;
+}
+
+.wrapper {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.wrapper img {
+  height: 150px;
+  flex-grow: 1;
+  object-fit: cover;
+}
