@@ -51,7 +51,6 @@ export default function Booking({ type, roomId, bookings }: Props) {
     endOfWeek.setHours(23, 59, 59);
     return { startOfWeek, endOfWeek };
   };
-  const { startOfWeek, endOfWeek } = getStartAndEndOfWeek(today.toDateString());
   const getEachDayOfWeek = (date: string) => {
     const { startOfWeek } = getStartAndEndOfWeek(date);
 

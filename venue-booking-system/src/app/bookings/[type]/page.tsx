@@ -110,11 +110,16 @@ export default function BookingPage({ params, searchParams }: Props) {
   );
   const endOfNextWeek = new Date(endOfWeek.setDate(startOfWeek.getDate() + 7));
 
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  startOfMonth.setHours(0, 0, 0);
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  endOfMonth.setHours(23, 59, 59);
+
   const getBookingsByRange = (roomId: string, bookingRange: BookingRange) => {
     const rangeCondition = {
       thisweek: { start: startOfWeek, end: endOfWeek },
       nextweek: { start: startOfNextWeek, end: endOfNextWeek },
-      wholemonth: { start: startOfNextWeek, end: endOfNextWeek },
+      wholemonth: { start: startOfMonth, end: endOfMonth },
     };
     const { start, end } = rangeCondition[bookingRange] || {};
     if (!start || !end) {
