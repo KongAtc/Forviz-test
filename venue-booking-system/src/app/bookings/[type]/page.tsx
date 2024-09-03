@@ -103,12 +103,12 @@ export default function BookingPage({ params, searchParams }: Props) {
     endOfWeek.setHours(23, 59, 59);
     return { startOfWeek, endOfWeek };
   };
-  const { startOfWeek, endOfWeek } = getStartAndEndOfWeek(today.toDateString());
+  const { startOfWeek, endOfWeek } = getStartAndEndOfWeek(today.toISOString());
 
-  const startOfNextWeek = new Date(
-    startOfWeek.setDate(startOfWeek.getDate() + 7)
-  );
-  const endOfNextWeek = new Date(endOfWeek.setDate(startOfWeek.getDate() + 7));
+  const startOfNextWeek = new Date(startOfWeek);
+  startOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
+  const endOfNextWeek = new Date(startOfNextWeek);
+  endOfNextWeek.setDate(startOfNextWeek.getDate() + 6);
 
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   startOfMonth.setHours(0, 0, 0);
