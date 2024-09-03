@@ -95,7 +95,6 @@ export default function Booking({
       );
     });
   };
-
   return (
     <div className="flex w-full h-full">
       <div className="bg-[#46529D] w-2/5 pl-[90px] max-h-[1000px] pb-[90px] text-white">
@@ -172,46 +171,51 @@ export default function Booking({
         </div>
         {bookings.length > 0 ? (
           <div className="flex-1 overflow-auto scroll-smooth max-h-[800px]">
-            {getEachDayOfRange().map((day) => (
-              <div key={day.toDateString()}>
-                <p className="font-bold bg-[#F7F7F7] pl-24 border py-4 border-[#ECECEC] text-[18px] text-[#787878]">
-                  {today.getDate() === day.getDate() && "Today "}(
-                  {daysInWeek[day.getDay()]}, {day.getDate()}{" "}
-                  {months[day.getMonth()]} )
-                </p>
-                <ul>
-                  {getBookings(day).map((booking) => {
-                    const formattedStartTime = new Date(
-                      booking.startTime
-                    ).toLocaleTimeString("en-GB", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
-                    const formattedEndTime = new Date(
-                      booking.endTime
-                    ).toLocaleTimeString("en-GB", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
-                    return (
-                      <li
-                        key={booking.id}
-                        className="p-4 border-l relative ml-14 pb-20">
-                        <div className="w-2 h-2 absolute top-8 bg-red-400 -ml-5 rounded-full" />
-                        <div className="absolute left-10 top-1/4 flex">
-                          <div>
-                            <p className="opacity-50">
-                              {formattedStartTime} - {formattedEndTime}
-                            </p>
-                            <p className="text-xl">{booking.title}</p>
+            {getEachDayOfRange().map((day) => {
+              const tomorrowDate = new Date(today);
+              tomorrowDate.setDate(today.getDate() + 1);
+              return (
+                <div key={day.toDateString()}>
+                  <p className="font-bold bg-[#F7F7F7] pl-24 border py-4 border-[#ECECEC] text-[18px] text-[#787878]">
+                    {today.getDate() === day.getDate() && "Today "}
+                    {tomorrowDate.getDate() === day.getDate() && "Tomorrow "}(
+                    {daysInWeek[day.getDay()]}, {day.getDate()}{" "}
+                    {months[day.getMonth()]} )
+                  </p>
+                  <ul>
+                    {getBookings(day).map((booking) => {
+                      const formattedStartTime = new Date(
+                        booking.startTime
+                      ).toLocaleTimeString("en-GB", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+                      const formattedEndTime = new Date(
+                        booking.endTime
+                      ).toLocaleTimeString("en-GB", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+                      return (
+                        <li
+                          key={booking.id}
+                          className="p-4 border-l relative ml-14 pb-20">
+                          <div className="w-2 h-2 absolute top-8 bg-red-400 -ml-5 rounded-full" />
+                          <div className="absolute left-10 top-1/4 flex">
+                            <div>
+                              <p className="opacity-50">
+                                {formattedStartTime} - {formattedEndTime}
+                              </p>
+                              <p className="text-xl">{booking.title}</p>
+                            </div>
                           </div>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="flex justify-center items-center flex-1">
