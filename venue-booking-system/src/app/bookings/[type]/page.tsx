@@ -15,8 +15,6 @@ type Props = {
   searchParams: { [key: string]: string | undefined };
 };
 
-const MILLISECOND_PER_WEEK = 604800000;
-
 export default function BookingPage({ params, searchParams }: Props) {
   if (!searchParams.roomId) {
     return;
@@ -94,59 +92,51 @@ export default function BookingPage({ params, searchParams }: Props) {
     },
   ];
 
-  const today = new Date("2019-09-29");
-  const currentDate = today.getDate();
-  const currentDay = today.getDay();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(currentDate - ((currentDay + 6) % 7));
-  startOfWeek.setHours(0, 0, 0);
-  const endOfWeek = new Date(today);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
-  endOfWeek.setHours(23, 59, 59);
+  const today = new Date();
+  const getStartAndEndOfWeek = (date: string) => {
+    const inputDate = new Date(date);
+    const startOfWeek = new Date(inputDate);
+    startOfWeek.setDate(inputDate.getDate() - ((inputDate.getDay() + 6) % 7));
+    startOfWeek.setHours(0, 0, 0);
+    const endOfWeek = new Date(inputDate);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59);
+    return { startOfWeek, endOfWeek };
+  };
+  const { startOfWeek, endOfWeek } = getStartAndEndOfWeek(today.toDateString());
 
-  const startOfNextWeek = startOfWeek.getTime() + MILLISECOND_PER_WEEK;
-  const endOfNextWeek = endOfWeek.getTime() + MILLISECOND_PER_WEEK;
+  const startOfNextWeek = new Date(
+    startOfWeek.setDate(startOfWeek.getDate() + 7)
+  );
+  const endOfNextWeek = new Date(endOfWeek.setDate(startOfWeek.getDate() + 7));
 
   const getBookingsByRange = (roomId: string, bookingRange: BookingRange) => {
-    const matchedRoomId = bookingData.filter(
-      (booking) => booking.roomId === roomId
-    );
-    const todayBookings = matchedRoomId.filter((booking) => {
-      const bookingStartDate = new Date(booking.startTime).getDate();
-      const bookingEndDate = new Date(booking.endTime).getDate();
-
-      return bookingStartDate === currentDate || bookingEndDate === currentDate;
-    });
-    if (bookingRange === "thisweek") {
-      const currentWeekBookings = matchedRoomId.filter((booking) => {
-        const bookingStartTime = new Date(booking.startTime).getTime();
-        const bookingEndTime = new Date(booking.startTime).getTime();
-        const isStartThisWeek =
-          bookingStartTime >= startOfWeek.getTime() &&
-          bookingStartTime <= endOfWeek.getTime();
-        const isEndThisWeek =
-          bookingEndTime >= startOfWeek.getTime() &&
-          bookingEndTime <= endOfWeek.getTime();
-
-        return isStartThisWeek || isEndThisWeek;
-      });
-      return currentWeekBookings;
-    } else if (bookingRange === "nextweek") {
-      const nextWeekBookings = matchedRoomId.filter((booking) => {
-        const bookingStartDate = new Date(booking.startTime).getTime();
-        const bookingEndDate = new Date(booking.endTime).getTime();
-        const isStartNextWeek =
-          bookingStartDate >= startOfNextWeek &&
-          bookingStartDate <= endOfNextWeek;
-        const isEndNextWeek =
-          bookingEndDate >= startOfNextWeek && bookingEndDate <= endOfNextWeek;
-
-        return isStartNextWeek || isEndNextWeek;
-      });
-      return nextWeekBookings;
-    } else {
+    const rangeCondition = {
+      thisweek: { start: startOfWeek, end: endOfWeek },
+      nextweek: { start: startOfNextWeek, end: endOfNextWeek },
+      wholemonth: { start: startOfNextWeek, end: endOfNextWeek },
+    };
+    const { start, end } = rangeCondition[bookingRange] || {};
+    if (!start || !end) {
       return [];
     }
+
+    const currentWeekBookings = bookingData.filter((booking) => {
+      if (booking.roomId !== roomId) return false;
+
+      const bookingStartTime = new Date(booking.startTime).getTime();
+      const bookingEndTime = new Date(booking.endTime).getTime();
+      const isStartThisWeek =
+        bookingStartTime >= start.getTime() &&
+        bookingStartTime <= end.getTime();
+      const isEndThisWeek =
+        bookingEndTime >= start.getTime() && bookingEndTime <= end.getTime();
+      const isSpanningThisWeek =
+        bookingStartTime <= start.getTime() && bookingEndTime >= end.getTime();
+
+      return isStartThisWeek || isEndThisWeek || isSpanningThisWeek;
+    });
+    return currentWeekBookings;
   };
   const bookings = getBookingsByRange(searchParams.roomId, params.type);
 
