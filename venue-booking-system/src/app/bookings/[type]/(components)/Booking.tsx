@@ -166,7 +166,7 @@ export default function Booking({
             onClick={() => {
               router.push(`/bookings/wholemonth?roomId=${roomId}`);
             }}>
-            WHOLE WEEK
+            WHOLE MONTH
           </button>
         </div>
         {bookings.length > 0 ? (
