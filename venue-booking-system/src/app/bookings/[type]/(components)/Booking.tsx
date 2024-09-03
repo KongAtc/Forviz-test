@@ -19,6 +19,7 @@ type Props = {
   start: Date;
   end: Date;
   today: Date;
+  todayBookings: Booking[];
 };
 const months = [
   "Jan",
@@ -50,11 +51,11 @@ export default function Booking({
   start,
   end,
   today,
+  todayBookings,
 }: Props) {
   const router = useRouter();
   const currentDate = today.getDate();
   const currentDay = today.getDay();
-
   const getEachDayOfRange = () => {
     if (type === "thisweek" || type === "nextweek") {
       const daysOfWeek = [];
@@ -109,7 +110,7 @@ export default function Booking({
           {currentDate} {months[today.getMonth()]}
         </p>
         <ul className="flex flex-col gap-2 max-h-80 mr-2 overflow-auto scroll-smooth">
-          {getBookings(today).map((booking) => {
+          {todayBookings.map((booking) => {
             const formattedStartTime = new Date(
               booking.startTime
             ).toLocaleTimeString("en-GB", {

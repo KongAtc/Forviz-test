@@ -112,7 +112,6 @@ export default function BookingPage({ params, searchParams }: Props) {
   startOfMonth.setHours(0, 0, 0);
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   endOfMonth.setHours(23, 59, 59);
-
   const rangeCondition = {
     thisweek: { start: startOfWeek, end: endOfWeek },
     nextweek: { start: startOfNextWeek, end: endOfNextWeek },
@@ -145,12 +144,30 @@ export default function BookingPage({ params, searchParams }: Props) {
     return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
   });
 
+  const getBookings = (date: Date) => {
+    const startOfDay = new Date(date).setHours(0, 0, 0);
+    const endOfDay = new Date(date).setHours(23, 59, 59);
+    return bookingData.filter((booking) => {
+      const bookingStartDate = new Date(booking.startTime).getTime();
+      const bookingEndDate = new Date(booking.endTime).getTime();
+      return (
+        (bookingStartDate >= startOfDay && bookingStartDate <= endOfDay) ||
+        (bookingEndDate >= startOfDay && bookingEndDate <= endOfDay) ||
+        (bookingStartDate <= startOfDay && bookingEndDate >= endOfDay)
+      );
+    });
+  };
+  const sortedTodayBooking = getBookings(today).sort((a, b) => {
+    return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+  });
+
   return (
     <Booking
       type={params.type}
       roomId={searchParams.roomId}
       bookings={sortedBookings}
       today={today}
+      todayBookings={sortedTodayBooking}
       start={start}
       end={end}
     />
