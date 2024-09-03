@@ -141,12 +141,15 @@ export default function BookingPage({ params, searchParams }: Props) {
     return currentWeekBookings;
   };
   const bookings = getBookingsByRange(searchParams.roomId);
+  const sortedBookings = bookings.sort((a, b) => {
+    return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+  });
 
   return (
     <Booking
       type={params.type}
       roomId={searchParams.roomId}
-      bookings={bookings}
+      bookings={sortedBookings}
       today={today}
       start={start}
       end={end}
