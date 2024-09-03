@@ -92,7 +92,7 @@ export default function BookingPage({ params, searchParams }: Props) {
     },
   ];
 
-  const today = new Date();
+  const today = new Date("2019-09-28");
   const getStartAndEndOfWeek = (date: string) => {
     const inputDate = new Date(date);
     const startOfWeek = new Date(inputDate);
@@ -104,28 +104,25 @@ export default function BookingPage({ params, searchParams }: Props) {
     return { startOfWeek, endOfWeek };
   };
   const { startOfWeek, endOfWeek } = getStartAndEndOfWeek(today.toISOString());
-
   const startOfNextWeek = new Date(startOfWeek);
   startOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
   const endOfNextWeek = new Date(startOfNextWeek);
   endOfNextWeek.setDate(startOfNextWeek.getDate() + 6);
-
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   startOfMonth.setHours(0, 0, 0);
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   endOfMonth.setHours(23, 59, 59);
 
-  const getBookingsByRange = (roomId: string, bookingRange: BookingRange) => {
-    const rangeCondition = {
-      thisweek: { start: startOfWeek, end: endOfWeek },
-      nextweek: { start: startOfNextWeek, end: endOfNextWeek },
-      wholemonth: { start: startOfMonth, end: endOfMonth },
-    };
-    const { start, end } = rangeCondition[bookingRange] || {};
-    if (!start || !end) {
-      return [];
-    }
-
+  const rangeCondition = {
+    thisweek: { start: startOfWeek, end: endOfWeek },
+    nextweek: { start: startOfNextWeek, end: endOfNextWeek },
+    wholemonth: { start: startOfMonth, end: endOfMonth },
+  };
+  const { start, end } = rangeCondition[params.type] || {};
+  if (!start || !end) {
+    return [];
+  }
+  const getBookingsByRange = (roomId: string) => {
     const currentWeekBookings = bookingData.filter((booking) => {
       if (booking.roomId !== roomId) return false;
 
@@ -143,13 +140,16 @@ export default function BookingPage({ params, searchParams }: Props) {
     });
     return currentWeekBookings;
   };
-  const bookings = getBookingsByRange(searchParams.roomId, params.type);
+  const bookings = getBookingsByRange(searchParams.roomId);
 
   return (
     <Booking
       type={params.type}
       roomId={searchParams.roomId}
       bookings={bookings}
+      today={today}
+      start={start}
+      end={end}
     />
   );
 }

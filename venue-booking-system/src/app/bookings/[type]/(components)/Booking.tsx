@@ -1,5 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
+type BookingRange = "thisweek" | "nextweek" | "wholemonth";
+
 type Booking = {
   id: number;
   roomId: string;
@@ -9,9 +13,12 @@ type Booking = {
 };
 
 type Props = {
-  type: string;
+  type: BookingRange;
   roomId: string;
   bookings: Booking[];
+  start: Date;
+  end: Date;
+  today: Date;
 };
 const months = [
   "Jan",
@@ -36,34 +43,45 @@ const daysInWeek = [
   "Friday",
   "Saturday",
 ];
-export default function Booking({ type, roomId, bookings }: Props) {
-  const today = new Date("2019-09-28");
+export default function Booking({
+  type,
+  roomId,
+  bookings,
+  start,
+  end,
+  today,
+}: Props) {
+  const router = useRouter();
   const currentDate = today.getDate();
   const currentDay = today.getDay();
 
-  const getStartAndEndOfWeek = (date: string) => {
-    const inputDate = new Date(date);
-    const startOfWeek = new Date(inputDate);
-    startOfWeek.setDate(inputDate.getDate() - ((inputDate.getDay() + 6) % 7));
-    startOfWeek.setHours(0, 0, 0);
-    const endOfWeek = new Date(inputDate);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59);
-    return { startOfWeek, endOfWeek };
-  };
-  const getEachDayOfWeek = (date: string) => {
-    const { startOfWeek } = getStartAndEndOfWeek(date);
+  const getEachDayOfRange = () => {
+    if (type === "thisweek" || type === "nextweek") {
+      const daysOfWeek = [];
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(start);
+        day.setDate(start.getDate() + i);
+        daysOfWeek.push(day);
+      }
 
-    const daysOfWeek = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      daysOfWeek.push(day);
+      return daysOfWeek;
+    } else if (type === "wholemonth") {
+      const daysOfMonth = [];
+      const lastDayOfMonth = new Date(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        0
+      );
+      for (let i = 0; i < lastDayOfMonth.getDate(); i++) {
+        const day = new Date(start);
+        day.setDate(start.getDate() + i);
+        daysOfMonth.push(day);
+      }
+      return daysOfMonth;
+    } else {
+      return [];
     }
-
-    return daysOfWeek;
   };
-
   const getBookings = (date: Date) => {
     const startOfDay = new Date(date).setHours(0, 0, 0);
     const endOfDay = new Date(date).setHours(23, 59, 59);
@@ -80,7 +98,7 @@ export default function Booking({ type, roomId, bookings }: Props) {
 
   return (
     <div className="flex w-full h-full">
-      <div className="bg-[#46529D] w-2/5 pl-[90px] pb-[90px] text-white">
+      <div className="bg-[#46529D] w-2/5 pl-[90px] max-h-[1000px] pb-[90px] text-white">
         <div className="bg-[#2EBAEE] h-[135px] leading-none pt-14 pl-12 pb-8">
           <p className="text-[54px] font-medium">{roomId}</p>
         </div>
@@ -91,7 +109,7 @@ export default function Booking({ type, roomId, bookings }: Props) {
         <p className="font-light text-[64px] mb-[68px]">
           {currentDate} {months[today.getMonth()]}
         </p>
-        <ul className="flex flex-col gap-2 max-h-96 mr-2 overflow-auto">
+        <ul className="flex flex-col gap-2 max-h-80 mr-2 overflow-auto scroll-smooth">
           {getBookings(today).map((booking) => {
             const formattedStartTime = new Date(
               booking.startTime
@@ -118,13 +136,43 @@ export default function Booking({ type, roomId, bookings }: Props) {
       </div>
       <div className="bg-white flex flex-col min-h-full w-3/5 relative">
         <div className="pl-16 pt-20 h-[135px] flex gap-[75px] bg-[#EFEEEC] text-2xl">
-          <p>THIS WEEK</p>
-          <p>NEXT WEEK</p>
-          <p>WHOLE WEEK</p>
+          <button
+            className={
+              type === "thisweek"
+                ? "opacity-100 border-b-2 border-[#707FDD]"
+                : "opacity-50"
+            }
+            onClick={() => {
+              router.push(`/bookings/thisweek?roomId=${roomId}`);
+            }}>
+            THIS WEEK
+          </button>
+          <button
+            className={
+              type === "nextweek"
+                ? "opacity-100 border-b-2 border-[#707FDD]"
+                : "opacity-50"
+            }
+            onClick={() => {
+              router.push(`/bookings/nextweek?roomId=${roomId}`);
+            }}>
+            NEXT WEEK
+          </button>
+          <button
+            className={
+              type === "wholemonth"
+                ? "opacity-100 border-b-2 border-[#707FDD]"
+                : "opacity-50"
+            }
+            onClick={() => {
+              router.push(`/bookings/wholemonth?roomId=${roomId}`);
+            }}>
+            WHOLE WEEK
+          </button>
         </div>
         {bookings.length > 0 ? (
-          <div className="flex-1 overflow-auto">
-            {getEachDayOfWeek(today.toDateString()).map((day) => (
+          <div className="flex-1 overflow-auto scroll-smooth max-h-[800px]">
+            {getEachDayOfRange().map((day) => (
               <div key={day.toDateString()}>
                 <p className="font-bold bg-[#F7F7F7] pl-24 border py-4 border-[#ECECEC] text-[18px] text-[#787878]">
                   {today.getDate() === day.getDate() && "Today "}(
